@@ -1,0 +1,58 @@
+Name     cbm2ramn ;
+PartNo   0 ;
+Date     2019-01-12 ;
+Revision 01 ;
+Designer Michal Pleban ;
+Company  Michal Pleban ;
+Assembly None ;
+Location  ;
+Device   g22v10 ;
+
+/* *************** INPUT PINS *********************/
+PIN 1 = A12;
+PIN 2 = A13;
+PIN 3 = A14;
+PIN 4 = A15;
+PIN 5 = PHI1;
+PIN 6 = BP0;
+PIN 7 = BP1;
+PIN 8 = BP2;
+PIN 9 = BP3;
+PIN 10 = !CAS;
+PIN 11 = !BUSY2;
+PIN 13 = !ECAS;
+
+/* *************** OUTPUT PINS *********************/
+PIN 23 = !ROM3;
+PIN 22 = !ROM2;
+PIN 21 = !ROM1;
+PIN 20 = !RAM;
+PIN 15 = !CS1;
+PIN 14 = !CS2;
+
+CS1 = ( (!BUSY2 & CAS) # (BUSY2 & ECAS) ) &		 /* Select appropriate CAS line */
+	  !BP3;
+
+CS2 = ( (!BUSY2 & CAS) # (BUSY2 & ECAS) ) &		 /* Select appropriate CAS line */
+	( ( BP3 & !BP2 & !BP1 & !BP0) #			 /* 1000 - bank 8 */
+	  ( BP3 & !BP2 & !BP1 &  BP0) #			 /* 1001 - bank 9 */
+	  ( BP3 & !BP2 &  BP1 & !BP0) #			 /* 1010 - bank 10 */
+	  ( BP3 & !BP2 &  BP1 &  BP0) #			 /* 1011 - bank 11 */
+	  ( BP3 &  BP2 & !BP1 & !BP0) #			 /* 1100 - bank 12 */
+	  ( BP3 &  BP2 & !BP1 &  BP0) #			 /* 1101 - bank 13 */
+	  ( BP3 &  BP2 &  BP1 & !BP0) #			 /* 1110 - bank 14 */
+	  ( BP3 &  BP2 &  BP1 &  BP0 & BUSY2 ) );	 /* 1111 - bank 15 only for 8088 */
+
+
+ROM3 = ((BP0 & BP1 & BP2 & BP3) # BUSY2) &
+	 !A15 &  A14 &  A13;				 /* 6000 */
+ROM2 = ((BP0 & BP1 & BP2 & BP3) # BUSY2) & 
+	 !A15 &  A14 & !A13;				 /* 4000 */
+ROM1 = ((BP0 & BP1 & BP2 & BP3) # BUSY2) & 
+	 !A15 & !A14 &  A13;				 /* 2000 */
+
+RAM = ((BP0 & BP1 & BP2 & BP3) # BUSY2) & 
+	 A15 & A14 & !A13 & !A12;			 /* C000 */
+
+
+
